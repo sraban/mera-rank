@@ -1,0 +1,95 @@
+php artisan make:migration create_roles_table
+php artisan make:migration create_users_table
+php artisan migrate
+php artisan migrate:rollback
+php artisan migrate:reset
+php artisan migrate:fresh
+php artisan migrate:fresh --seed
+php artisan migrate:refresh --seed
+
+
+  
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+
+    public function up()
+    {
+        Schema::rename('event', 'event');
+        Schema::enableForeignKeyConstraints();
+
+        Schema::create('events', function (Blueprint $table) {
+            
+            $table->bigIncrements('id')->unsigned()->comment('my comment');
+            
+
+            $table->uuid('ref')->comment('my comment')	;
+            $table->string('email')->unique(); // $table->unique('email', 'unique_email'); 
+            $table->string('name')->comment('my comment')	;
+            $table->bigInteger('votes')->comment('my comment')	;
+            $table->boolean('status')->comment('my comment')	;
+            $table->date('event_date'); $table->dateTimeTz('event_date', 0)->comment('my comment')	;
+            $table->longText('description')->nullable()->comment('my comment')	;
+            $table->decimal('amount', 8, 2)->comment('my comment')	;
+            $table->double('amount', 8, 2)->comment('my comment')	;
+            $table->rememberToken()->comment('my comment')	;
+            $table->softDeletes(0)->comment('my comment')	;
+            $table->time('sunrise', 0);	$table->timeTz('sunrise', 0)->comment('my comment')	;	
+            $table->softDeletesTz(0)->comment('my comment')	;
+            $table->timestamp('added_on', 0);	 $table->timestampTz('added_on', 0)->comment('my comment')	;
+            $table->timestamps(); // $table->timestampsTz(0)->comment('my comment')	;
+            $table->year('birth_year')->useCurrent()->comment('my comment');
+            $table->json('options')->comment('my comment'); $table->json('movies')->default(new Expression('(JSON_ARRAY())'));
+            
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            
+            
+            $table->primary(['id', 'parent_id']);	
+            $table->unique('email');	
+            $table->index('state');	
+            $table->spatialIndex('location');	
+            $table->renameIndex('from', 'to');
+            $table->index(['account_id', 'created_at']);
+            
+            $table->renameColumn('from', 'to');
+            $table->engine = 'InnoDB';
+            $table->charset = 'utf8';	
+            $table->collation = 'utf8_unicode_ci';
+            $table->temporary();
+        });
+        
+    }
+
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::drop('events');
+        Schema::dropIfExists('events');
+        Schema::disableForeignKeyConstraints();
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('votes'); $table->dropColumn(['votes', 'avatar', 'location']);
+            $table->dropRememberToken();	
+            $table->dropSoftDeletes();	$table->dropSoftDeletesTz();	
+            $table->dropTimestamps();	$table->dropTimestampsTz();	
+            
+            $table->dropPrimary('users_id_primary');	
+            $table->dropUnique('users_email_unique');	
+            $table->dropIndex('geo_state_index');	
+            $table->dropSpatialIndex('geo_location_spatialindex');
+            $table->dropIndex(['state']); // Drops index 'geo_state_index'
+            $table->dropForeign('posts_user_id_foreign'); //$table->dropForeign(['user_id']);
+
+        });
+    }
+    
+    
